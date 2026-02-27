@@ -1,4 +1,4 @@
-name: Deploy to Cloidflare
+name: Deploy to Cloudflare
 
 on:
   push:
@@ -32,3 +32,23 @@ jobs:
         with:
           name: dist
           path: dist/
+  
+  release:
+    needs: deploy
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-paged-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy dist/Practice5/index.js --name practice5.sarimarmor3.workers.dev --compatibility-date 2026-02-26 --compatibility-flags nodejs_compat --asset dist/dist
+          
